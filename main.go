@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -110,6 +111,58 @@ func atoi(s string) int {
 	return i
 }
 
+func listFilesInDirectory(dirPath string) ([]string, error) {
+	var fileList []string
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			fileList = append(fileList, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return fileList, nil
+}
+
+func getActiveUsers() ([]string, error) {
+	pattern := `^\.nfs\d{24}$`
+	r, err := regexp.Compile(pattern)
+	if err != nil {
+		return nil, err
+	}
+
+	var usernames []string
+
+	fileList, err := listFilesInDirectory(InProgressDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, filePath := range fileList {
+		parts := strings.Split(filepath.Base(filePath), ":")
+		username := ""
+		if len(parts) > 0 {
+			if r.MatchString(parts[0]) {
+				continue
+			}
+			username = parts[0]
+		} else {
+			return nil, errors.New(fmt.Sprintf("Unexpected file name: %s", filepath.Base(filePath)))
+		}
+
+		usernames = append(usernames, username)
+	}
+
+	return usernames, nil
+}
+
 func eventLoop(watcher *fsnotify.Watcher) error {
 	payload := discordWebhook{
 		UserName:  UserName,
@@ -122,16 +175,30 @@ func eventLoop(watcher *fsnotify.Watcher) error {
 	if err != nil {
 		return err
 	}
+	oldInprogressUsers, err := getActiveUsers()
+	if err != nil {
+		return err
+	}
 
 	for {
 		select {
 		case event := <-watcher.Events:
-			//log.Printf("EVENT: %+v %+v\n", event.Op, event.Name)
+			log.Printf("EVENT: %+v %+v\n", event.Op, event.Name)
 
 			if InProgressDir == filepath.Dir(event.Name) {
 				parts := strings.Split(filepath.Base(event.Name), ":")
 				username := ""
+
+				pattern := `^\.nfs\d{24}$`
+				r, err := regexp.Compile(pattern)
+				if err != nil {
+					return err
+				}
+
 				if len(parts) > 0 {
+					if r.MatchString(parts[0]) {
+						continue
+					}
 					username = parts[0]
 				} else {
 					return errors.New(fmt.Sprintf("Unexpected file name: %s", filepath.Base(event.Name)))
@@ -141,15 +208,32 @@ func eventLoop(watcher *fsnotify.Watcher) error {
 					if err := sendWebhook(&payload); err != nil {
 						return err
 					}
-				}
-				if event.Op == fsnotify.Remove {
-					payload.Content = fmt.Sprintf("%s finished exploring.", username)
-					if err := sendWebhook(&payload); err != nil {
+					oldInprogressUsers, err = getActiveUsers()
+					if err != nil {
 						return err
 					}
 				}
-
+				if event.Op == fsnotify.Remove {
+					inprogressUsers, err := getActiveUsers()
+					if err != nil {
+						return err
+					}
+				OuterLoop:
+					for _, old := range oldInprogressUsers {
+						for _, u := range inprogressUsers {
+							if old == u {
+								continue OuterLoop
+							}
+						}
+						payload.Content = fmt.Sprintf("%s finished exploring.", old)
+						if err := sendWebhook(&payload); err != nil {
+							return err
+						}
+					}
+					oldInprogressUsers = inprogressUsers
+				}
 			}
+
 			if event.Op == fsnotify.Write && event.Name == RecordFileName {
 				records, err := parseRecord()
 				if err != nil {

@@ -133,7 +133,7 @@ func listFilesInDirectory(dirPath string) ([]string, error) {
 }
 
 func getActiveUsers() ([]string, error) {
-	pattern := `^\.nfs\d{24}$`
+	pattern := `^\.nfs[0-9a-f]{24}$`
 	r, err := regexp.Compile(pattern)
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func eventLoop(watcher *fsnotify.Watcher) error {
 				parts := strings.Split(filepath.Base(event.Name), ":")
 				username := ""
 
-				pattern := `^\.nfs\d{24}$`
+				pattern := `^\.nfs[0-9a-f]{24}$`
 				r, err := regexp.Compile(pattern)
 				if err != nil {
 					return err

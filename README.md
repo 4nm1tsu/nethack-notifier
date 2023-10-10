@@ -21,3 +21,4 @@ Run as a [nethack-server](https://github.com/4nm1tsu/nethack-server) sidecar con
 | WEBHOOK_URL      | string | Path of webhook URL of discord.              |
 | AVATAR_URL       | string | Path of bot's avatar image.                  |
 | USER_NAME        | string | Bot's name.                                  |
+| SERVER_DOMAIN    | string | Domain name of the server                    |

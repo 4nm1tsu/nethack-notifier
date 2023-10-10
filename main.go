@@ -77,6 +77,7 @@ var RecordFileName string
 var WebhookURL string
 var AvatarURL string
 var UserName string
+var ServerDomain string
 
 func sendWebhook(payload *discordWebhook) error {
 	j, err := json.Marshal(payload)
@@ -204,7 +205,7 @@ func eventLoop(watcher *fsnotify.Watcher) error {
 					return errors.New(fmt.Sprintf("Unexpected file name: %s", filepath.Base(event.Name)))
 				}
 				if event.Op == fsnotify.Create {
-					payload.Content = fmt.Sprintf("%s started exploring.", username)
+					payload.Content = fmt.Sprintf("%s started exploring.\n`$ telnet %s` to watch the game in progress!", username, ServerDomain)
 					if err := sendWebhook(&payload); err != nil {
 						return err
 					}
@@ -325,6 +326,7 @@ func main() {
 	WebhookURL = os.Getenv("WEBHOOK_URL")
 	AvatarURL = os.Getenv("AVATAR_URL")
 	UserName = os.Getenv("USER_NAME")
+	ServerDomain = os.Getenv("SERVER_DOMAIN")
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

@@ -23,5 +23,6 @@ ENV IN_PROGRESS_DIR="/home/nethack/dgldir/inprogress-nh367"
 ENV WEBHOOK_URL="https://sample.com"
 ENV AVATAR_URL=""
 ENV USER_NAME="Nethack Notifer"
+ENV SERVER_DOMAIN="4nm1tsu.com"
 
 CMD [ "/app/nethack-notifier" ]

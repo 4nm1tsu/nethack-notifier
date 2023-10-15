@@ -197,10 +197,9 @@ func eventLoop(watcher *fsnotify.Watcher) error {
 				}
 
 				if len(parts) > 0 {
-					if r.MatchString(parts[0]) {
-						continue
+					if !r.MatchString(parts[0]) {
+						username = parts[0]
 					}
-					username = parts[0]
 				} else {
 					return errors.New(fmt.Sprintf("Unexpected file name: %s", filepath.Base(event.Name)))
 				}

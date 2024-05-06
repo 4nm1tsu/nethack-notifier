@@ -283,10 +283,15 @@ func parseRecord() ([]Record, error) {
 		line := scanner.Text()
 		parts := strings.Split(line, ",")
 		fields := strings.Fields(parts[0])
-		if len(fields) != 16 || len(parts) != 2 {
+		if len(fields) != 16 {
 			log.Printf("Invalid record: line %d", lineNumber)
 			continue
 			//return nil, errors.New(fmt.Sprintf("Invalid record file format: %s", line))
+		}
+
+		result := ""
+		for _, s := range parts[1:] {
+			result += s
 		}
 
 		record := Record{
@@ -306,7 +311,7 @@ func parseRecord() ([]Record, error) {
 			Gender:          fields[13],
 			Alignment:       fields[14],
 			Name:            fields[15],
-			Result:          parts[1],
+			Result:          result,
 		}
 
 		records = append(records, record)

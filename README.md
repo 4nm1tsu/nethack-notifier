@@ -1,12 +1,11 @@
 # nethack-notifier
 
-<p align="center">
-  <p align="center">Application to notify nethack server activity via discord webhook</p>
-  <p align="center"><a href="https://github.com/4nm1tsu/nethack-notifier/actions/workflows/docker-build.yml"><img src="https://github.com/4nm1tsu/nethack-notifier/actions/workflows/docker-build.yml/badge.svg"></img></a></p>
-  <p align="center">
-    <a href="https://hub.docker.com/r/4nm1tsu/nethack-notifier/tags"><img alt="Docker Hub" src="http://dockeri.co/image/4nm1tsu/nethack-notifier"></a>
-  </p>
-</p>
+Application to notify nethack server activity via discord webhook.
+
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Repository-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/4nm1tsu/nethack-notifier)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/4nm1tsu/nethack-notifier/docker-build.yml)](https://github.com/4nm1tsu/nethack-notifier/actions)
+
+
 
 ## Usage
 
